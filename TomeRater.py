@@ -76,7 +76,7 @@ class Book(object):
     def get_average_rating(self):
         num_ratings = len(self.ratings)
         cntr = 0
-        for i in range(self.ratings.count()):
+        for i in range(len(self.ratings)):
             cntr += self.ratings[i]
 
         return cntr/num_ratings
@@ -118,29 +118,49 @@ class TomeRater(object):
     def __init__(self):
         self.users = {}
         self.books = {}
+        self.isbns = []
+       
 
     def create_book(self, title, isbn):
-        return Book(title, isbn)
+        if self.is_isbn_unique(isbn) == 0:
+            self.isbns.append(isbn)
+            return Book(title, isbn) 
+        else:
+           print("Book with isbn {isbn_num} already exist".format(isbn_num=str(isbn)))
+              
          
     def create_novel(self, title, author, isbn):
-        return Fiction(title, author, isbn)        
+        if self.is_isbn_unique(isbn) == 0:
+            self.isbns.append(isbn)
+            return Fiction(title, author, isbn)
+        else:
+            print("Book with isbn {isbn_num} already exist".format(isbn_num=str(isbn)))
+                
 
     def create_non_fiction(self, title, subject, level, isbn):
-        return NonFiction(title, subject, level, isbn)        
+        if self.is_isbn_unique(isbn) == 0:
+            self.isbns.append(isbn)
+            return NonFiction(title, subject, level, isbn)
+        else:
+            print("Book with isbn {isbn_num} already exist".format(isbn_num=str(isbn)))
+                
 
-    def add_book_to_user(self, book, email, rating=None):
-       
-        if self.users.get(email) != None:
-           self.users[email].read_book(book, rating)
-           book.add_rating(rating)    
+    def is_isbn_unique(self, isbn):
+       val = [x for x in self.isbns if x == isbn]            
+       return len(val)
 
-           if self.books.get(book) == None:
-               self.books[book] = 1
-           else:
-               self.add_rating(book, rating)
-                           
+    def add_book_to_user(self, book, email, rating=None):       
+        if (self.users.get(email) != None and book != None):
+            self.users[email].read_book(book, rating)
+            book.add_rating(rating) 
+                
+            if self.books.get(book) == None:
+                self.books[book] = 1
+            else:
+                self.add_rating(book, rating)
         else:
             print("No user with email {email}!".format(email=email))
+       
 
     def add_rating(self, book, rating):
         if self.books.get(book) != None:
@@ -149,16 +169,25 @@ class TomeRater(object):
             self.books.update({book: rating})
 
     def add_user(self, name, email, user_books=None):
-        self.users[email] = User(name, email)
-        if user_books != None and len(user_books) >=0:
-            for i in range(len(user_books)):
-                self.add_book_to_user(user_books[i], email,1)
-       # if type(user_books) == 'list':
-       #     for book in len(user_books):
-       #             self.add_book_to_user(book, email)
-       #     elif type(user_books) == Book:
-       #          self.add_book_to_user(user_books, email) 
-
+        if self.users.get(email) != None:
+            print("Cannot a user {0} because an account already exists".format(email))
+        else:
+            is_valid = self.check_valid_email(email)
+            if is_valid == True:
+                self.users[email] = User(name, email)
+                if user_books != None and len(user_books) >=0:
+                    for i in range(len(user_books)):
+                        self.add_book_to_user(user_books[i], email,1)
+            else:
+                print("{0} email is not valid".format(email))
+      
+    def check_valid_email(self, email):
+        is_email_valid = True
+        if (email.find('@') == -1):
+            is_email_valid = False
+        elif ((email.find('.com') == -1 and email.find('.edu')== -1 and email.find('.org') == -1)):
+            is_email_valid = False
+        return is_email_valid
 
     def print_catalog(self):
         for key, value in self.books.items():
@@ -176,3 +205,27 @@ class TomeRater(object):
                 title = k.title
                 val = v
         print ("Most read book- Title: {0}. Book has been read {1} times".format(title,val))
+
+    def most_positive_user(self):
+        cnt = 0    
+        usr_Info = User   
+        for usr in self.users.values():
+            avg = usr.get_average_rating()
+            if avg > cnt:
+                usr_Info = usr
+                cnt = avg
+        print("User with the most positive rating is {name} with avg rating of {rating}".format(name=usr_Info.name,rating=str(cnt)))
+
+    def highest_rated_book(self):
+        cnt = 0    
+        book_Info = Book   
+        for book in self.books.keys():
+            avg = book.get_average_rating()
+            if avg > cnt:
+                book_Info = book
+                cnt = avg
+        print("Highest rated book is {title} with a rating of {rating}".format(title=book_Info.title,rating=str(cnt)))
+
+
+
+
