@@ -231,7 +231,3 @@ class TomeRater(object):
                 book_Info = book
                 cnt = avg
         print("Highest rated book is {title} with a rating of {rating}".format(title=book_Info.title,rating=str(cnt)))
-
-
-
-
