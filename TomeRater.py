@@ -121,6 +121,9 @@ class TomeRater(object):
         self.isbns = []
        
 
+    def display_isbns(self):
+        print(self.isbns)
+
     def create_book(self, title, isbn):
         if self.is_isbn_unique(isbn) == 0:
             self.isbns.append(isbn)
@@ -150,14 +153,17 @@ class TomeRater(object):
        return len(val)
 
     def add_book_to_user(self, book, email, rating=None):       
-        if (self.users.get(email) != None and book != None):
-            self.users[email].read_book(book, rating)
-            book.add_rating(rating) 
+        if self.users.get(email) != None:
+            if book != None:
+                self.users[email].read_book(book, rating)
+                book.add_rating(rating) 
                 
-            if self.books.get(book) == None:
-                self.books[book] = 1
+                if self.books.get(book) == None:
+                    self.books[book] = 1
+                else:
+                    self.add_rating(book, rating)
             else:
-                self.add_rating(book, rating)
+                print("Cannot add book of NoneType")
         else:
             print("No user with email {email}!".format(email=email))
        
